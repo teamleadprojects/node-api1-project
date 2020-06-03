@@ -49,10 +49,20 @@ server.get("/api/users/:id", (req, res) => {
 
 //Delete user by id
 server.delete("/api/users/:id", (req, res) => {
-  const id = req.params.id;
-  const deletedId = req.body;
-  users = users.filter((u) => u.d !== id);
-  res.status(200).json(users);
+  let id = req.params.id;
+  let toDelete = req.body;
+  if (id) {
+    if (users.length < 1 || id !== id) {
+      res
+        .status(404)
+        .json({ message: "The user with the specified ID does not exist." });
+    } else {
+      users = users.filter((user) => user.id !== Number(id));
+      res.status(200).json(users);
+    }
+  } else {
+    res.status(500).json({ errorMessage: "The user could not be removed" });
+  }
 });
 
 //Update a user
@@ -74,7 +84,7 @@ server.post("/api/users", (req, res) => {
   if (user.name && user.bio) {
     users.push(user);
     res.status(201).json(user);
-  } else {
+  } else if (!user) {
     res
       .status(400)
       .json({ errorMessage: "Please provide name and bio for user." });
